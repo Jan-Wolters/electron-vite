@@ -1,27 +1,28 @@
 // Import necessary modules
+// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 
-const { createConnection } = await import("mysql2/promise");
 import express, { json } from "express";
 import { createPool } from "mysql2";
 import cors from "cors";
 import { exec } from "child_process"; // Import the 'child_process' module
 
 const app = express();
-const port = 3005;
+const port = 3007;
 
 app.use(cors());
 app.use(json());
 
 // Database configuration
 const dbConfig = {
-  host: "10.0.11.196",
+  /* host: "10.0.11.196",
   user: "root",
   password: "Test@10!",
   database: "new_schema",
-  /* host: "localhost",
+  */
+  host: "localhost",
   user: "root",
   password: "", // <-- Add your MySQL password here
-  database: "hallotest",*/
+  database: "hallotest",
 };
 
 // Database manager
@@ -85,45 +86,51 @@ async function getInfo(req, res) {
 
     const companiesQuery = `
     SELECT
-    companies.company_id AS company_id,
-    companies.name AS company_name,
-    GROUP_CONCAT(DISTINCT repositories.id) AS repository_ids,
-    GROUP_CONCAT(DISTINCT repositories.name) AS repository_names,
-    GROUP_CONCAT(repositories.capacityGB) AS repository_capacities,
-    GROUP_CONCAT(repositories.freeGB) AS repository_frees,
-    GROUP_CONCAT(repositories.usedSpaceGB) AS repository_usedSpaces,
-    latest_session.session_name AS session_name,
-    latest_session.session_endTime AS session_endTime,
-    latest_session.session_resultResult AS session_resultResult,
-    latest_session.session_resultMessage AS session_resultMessage
-  FROM
-    companies
-  JOIN
-    repositories ON companies.company_id = repositories.company_id
-  LEFT JOIN (
+    c.company_id AS company_id,
+    c.name AS company_name,
+    GROUP_CONCAT(DISTINCT r.id) AS repository_ids,
+    GROUP_CONCAT(DISTINCT r.name) AS repository_names,
+    GROUP_CONCAT(r.capacityGB) AS repository_capacities,
+    GROUP_CONCAT(r.freeGB) AS repository_frees,
+    GROUP_CONCAT(r.usedSpaceGB) AS repository_usedSpaces,
+    ls.session_name AS session_name,
+    ls.session_endTime AS session_endTime,
+    ls.session_resultResult AS session_resultResult,
+    ls.session_resultMessage AS session_resultMessage
+FROM
+    companies c
+JOIN
+    repositories r ON c.company_id = r.company_id
+LEFT JOIN (
     SELECT
-      sessions.company_id,
-      sessions.name AS session_name,
-      sessions.endTime AS session_endTime,
-      sessions.resultResult AS session_resultResult,
-      sessions.resultMessage AS session_resultMessage
+        s.company_id,
+        s.name AS session_name,
+        s.endTime AS session_endTime,
+        s.resultResult AS session_resultResult,
+        s.resultMessage AS session_resultMessage
     FROM
-      sessions
+        sessions s
     INNER JOIN (
-      SELECT
-        company_id,
-        MAX(endTime) AS max_endTime
-      FROM
-        sessions
-      GROUP BY
-        company_id
-    ) AS latest ON sessions.company_id = latest.company_id AND sessions.endTime = latest.max_endTime
-  ) AS latest_session ON companies.company_id = latest_session.company_id
-  WHERE
-  companies.company_id = companies.company_id -- Specify the company IDs here
-  GROUP BY
-    companies.company_id, companies.name, latest_session.session_name, latest_session.session_endTime, latest_session.session_resultResult, latest_session.session_resultMessage;`;
-
+        SELECT
+            company_id,
+            MAX(endTime) AS max_endTime
+        FROM
+            sessions
+        GROUP BY
+            company_id
+    ) AS latest ON s.company_id = latest.company_id AND s.endTime = latest.max_endTime
+) AS ls ON c.company_id = ls.company_id
+WHERE
+    c.company_id = c.company_id -- Specify the company IDs here
+GROUP BY
+    c.company_id, c.name, ls.session_name, ls.session_endTime, ls.session_resultResult, ls.session_resultMessage
+ORDER BY
+    CASE
+        WHEN ls.session_resultResult = 'Danger' THEN 1
+        WHEN ls.session_resultResult = 'Warning' THEN 2
+        WHEN ls.session_resultResult = 'Success' THEN 3
+        ELSE 4
+    END;`;
     const companiesRows = await databaseManager.query(companiesQuery, [
       companyId,
     ]);
@@ -218,3 +225,12 @@ setTimeout(runScript, initialDelayInMilliseconds);
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
+
+/*
+De Vries Metaal
+
+restapi
+cGY9cOvkW2xVcg2D7Vny
+
+https://fw-devries.spdns.org:9419
+*/

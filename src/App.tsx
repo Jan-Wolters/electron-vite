@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Dashboard from "./vieuw/Dashboard.tsx";
-import Comapny from "./vieuw/Company.tsx";
+import Dashboard from "./vieuw/RoutePath/Dashboard.tsx";
+import Company from "./vieuw/RoutePath/CompanyADD.tsx";
 
 function App() {
   return (
@@ -12,7 +12,8 @@ function App() {
         <Routes>
           {/* Wrap your routes in the <Routes> component */}
           <Route path="/" element={<Dashboard />} />
-          <Route path="Company" element={<Comapny />} />
+          <Route path="Company" element={<Company />} />
+
           {/* Use the 'element' prop instead of 'component' */}
         </Routes>
       </div>

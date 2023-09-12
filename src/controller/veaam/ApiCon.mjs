@@ -5,15 +5,16 @@ import { createConnection } from "mysql2/promise";
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 const mysqlConfig = {
+  /*
   host: "10.0.11.196",
   user: "root",
   password: "Test@10!",
   database: "new_schema",
-  /*
+  */
   host: "localhost",
   user: "root",
   password: "", // <-- Add your MySQL password here
-  database: "hallotest",*/
+  database: "hallotest",
 };
 
 class AccessTokenManager {

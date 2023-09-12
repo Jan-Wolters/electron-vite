@@ -49,7 +49,7 @@ const fetchAndMapData = async <T>(endpoint: string): Promise<T[]> => {
 
 export const fetchData = async (): Promise<Company[]> => {
   try {
-    const endpoint = `http://localhost:3005/info`;
+    const endpoint = `http://localhost:3007/info`;
     const companyData = await fetchAndMapData<Company>(endpoint);
     return companyData;
   } catch (error) {
@@ -64,7 +64,7 @@ export const saveCompany = async (
   companyData: Partial<Company>
 ): Promise<Response> => {
   try {
-    const response = await fetch("http://localhost:3005/companies", {
+    const response = await fetch("http://localhost:3007/companies", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -35,7 +35,7 @@ function ListItem({ company_name, repositories, sessions }: ListItemProps) {
   return (
     <li>
       <div
-        className={`border border-dark text-center py-3 mt-2 position-relative d-flex align-items-center`}
+        className={`border border-dark text-center py-3 mt-2 position-relative d-flex align-items-center shadow-sm`}
         onClick={handleClick}
       >
         <span className="w-25 py-2 px-3 mx-1">{company_name}</span>
@@ -95,7 +95,7 @@ function ListItem({ company_name, repositories, sessions }: ListItemProps) {
                         />
                       </div>
                       <div
-                        className="flex-fill py-2 mx-4 border border-danger"
+                        className="flex-fill py-2 mx-4"
                         style={{ maxWidth: "300px" }}
                       >
                         {session.session_resultMessage}

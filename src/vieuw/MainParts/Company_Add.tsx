@@ -9,7 +9,7 @@ interface FormData {
   veaamPassword: string;
 }
 
-function CompanyADD() {
+function CompanyAdd() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     ip: "",
@@ -68,7 +68,7 @@ function CompanyADD() {
   const saveCompany = async (formData: FormData) => {
     try {
       const response = await axios.post(
-        "http://localhost:3003/companies",
+        "http://localhost:3007/companies",
         formData
       );
       console.log("Company saved successfully");
@@ -83,7 +83,7 @@ function CompanyADD() {
   // console.log("Rendering message:", message);
 
   return (
-    <div className="shadow-lg p-3 mb-5 bg-white rounded">
+    <div className="p-3 bg-white rounded">
       {message && (
         <div
           className={`alert ${
@@ -97,7 +97,7 @@ function CompanyADD() {
         </div>
       )}
 
-      <div className="border border-dark border-3 mt-5">
+      <div className="border border-dark border-3">
         <div className="text-center py-3 position-relative d-flex align-items-center">
           <div className="flex-fill py-2 px-3 mx-1">
             <span className="fw-bold">Bedrijfsinformatie</span>
@@ -118,7 +118,7 @@ function CompanyADD() {
             />
           </div>
           <div className="form-group my-1 ">
-            <label>naam</label>
+            <label>ip</label>
             <input
               className="form-control"
               type="text"
@@ -129,7 +129,7 @@ function CompanyADD() {
             />
           </div>
           <div className="form-group my-1 ">
-            <label>naam</label>
+            <label>port</label>
             <input
               className="form-control"
               type="text"
@@ -140,7 +140,7 @@ function CompanyADD() {
             />
           </div>
           <div className="form-group my-1 ">
-            <label>naam</label>
+            <label>VeaamUsername</label>
             <input
               className="form-control"
               type="text"
@@ -150,7 +150,7 @@ function CompanyADD() {
               onChange={handleChange}
             />
           </div>
-          <label>naam</label>
+          <label>VeaamPassword</label>
           <div className="form-group my-1 ">
             <input
               className="form-control"
@@ -170,4 +170,4 @@ function CompanyADD() {
   );
 }
 
-export default CompanyADD;
+export default CompanyAdd;
