@@ -14,6 +14,9 @@ function NavBar() {
         <div className="d-flex justify-content-center mx-auto">
           <div className=" d-flex">
             <div className="nav-item me-4">
+              <button id="refreshButton"> refresh</button>
+            </div>
+            <div className="nav-item me-4">
               <Link to="/" className="nav-link">
                 Home
               </Link>

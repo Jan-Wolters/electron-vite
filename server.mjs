@@ -1,28 +1,35 @@
-// Import necessary modules
-// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
-
-import express, { json } from "express";
+import express from "express";
+import { json } from "express";
 import { createPool } from "mysql2";
 import cors from "cors";
-import { exec } from "child_process"; // Import the 'child_process' module
+import { exec } from "child_process";
+
+import path from "path";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Construct the absolute path to the .env file using the current module's directory
+const dotenvPath = path.resolve(__dirname, ".env");
+
+// Load environment variables from the .env file
+dotenv.config({ path: dotenvPath });
 
 const app = express();
-const port = 3007;
-
+const port = 3008;
+let scriptCount = 0;
 app.use(cors());
 app.use(json());
 
 // Database configuration
 const dbConfig = {
-  /* host: "10.0.11.196",
-  user: "root",
-  password: "Test@10!",
-  database: "new_schema",
-  */
-  host: "localhost",
-  user: "root",
-  password: "", // <-- Add your MySQL password here
-  database: "hallotest",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
 };
 
 // Database manager
@@ -65,8 +72,12 @@ function runScript() {
     console.log(`Script output: ${stdout}`);
     console.error(`Script error: ${stderr}`);
 
-    // Set the delay for the next run (6 seconds)
-    const delayInMilliseconds = 5 * 60 * 1000; // 6000 milliseconds = 6 seconds
+    // Increment the script count
+    scriptCount++;
+    console.log(`Script count: ${scriptCount}`);
+
+    // Set the delay for the next run (1 minute)
+    const delayInMilliseconds = parseInt(1 * 60 * 1000);
 
     // Call the runScript function again after the delay
     setTimeout(runScript, delayInMilliseconds);
@@ -126,7 +137,7 @@ GROUP BY
     c.company_id, c.name, ls.session_name, ls.session_endTime, ls.session_resultResult, ls.session_resultMessage
 ORDER BY
     CASE
-        WHEN ls.session_resultResult = 'Danger' THEN 1
+        WHEN ls.session_resultResult = 'Failed' THEN 1
         WHEN ls.session_resultResult = 'Warning' THEN 2
         WHEN ls.session_resultResult = 'Success' THEN 3
         ELSE 4
@@ -213,24 +224,14 @@ function saveCompany(req, res) {
     });
 }
 
-// Set script path and initial delay
+// Set script path and start the initial run
 const scriptPath = "src/controller/veaam/ApiCon.mjs"; // Replace with the actual path
-const initialDelayInMilliseconds = 0.1 * 60 * 1000; // 6 seconds
 
 console.log("Starting ApiCon.js...");
 
-// Start the initial run
-setTimeout(runScript, initialDelayInMilliseconds);
+runScript(); // Start the initial run without any delay
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
-
-/*
-De Vries Metaal
-
-restapi
-cGY9cOvkW2xVcg2D7Vny
-
-https://fw-devries.spdns.org:9419
-*/

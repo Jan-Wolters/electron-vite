@@ -1,22 +1,28 @@
 import fetch from "node-fetch";
 import { createConnection } from "mysql2/promise";
+import path from "path";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Construct the absolute path to the .env file using the current module's directory
+const dotenvPath = path.resolve(__dirname, "..", "..", "..", ".env");
+
+// Load environment variables from the .env file
+dotenv.config({ path: dotenvPath });
 
 // Add this line to disable SSL certificate validation
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 const mysqlConfig = {
-  /*
-  host: "10.0.11.196",
-  user: "root",
-  password: "Test@10!",
-  database: "new_schema",
-  */
-  host: "localhost",
-  user: "root",
-  password: "", // <-- Add your MySQL password here
-  database: "hallotest",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
 };
-
 class AccessTokenManager {
   constructor() {
     this.access_token = null;
@@ -191,20 +197,20 @@ class AccessTokenManager {
     try {
       // Create a table for repositories if it doesn't exist (you can modify this SQL query based on your table structure)
       await connection.execute(`
-        CREATE TABLE IF NOT EXISTS repositories (
-          type VARCHAR(255),
-          id VARCHAR(255) PRIMARY KEY,
-          company_id INT,
-          name VARCHAR(255),
-          description TEXT,
-          hostId VARCHAR(255),
-          hostName VARCHAR(255),
-          path VARCHAR(255),
-          capacityGB FLOAT,
-          freeGB FLOAT,
-          usedSpaceGB FLOAT,
-          UNIQUE KEY unique_record (id)
-        )
+      CREATE TABLE IF NOT EXISTS repositories (
+        type VARCHAR(255),
+        id VARCHAR(255),
+        company_id INT,
+        name VARCHAR(255),
+        description TEXT,
+        hostId VARCHAR(255),
+        hostName VARCHAR(255),
+        path VARCHAR(255),
+        capacityGB FLOAT,
+        freeGB FLOAT,
+        usedSpaceGB FLOAT,
+        PRIMARY KEY (id, type,company_id) -- Define a unique key on both id and type columns
+      )
       `);
     } catch (error) {
       console.error("Error creating repositories table:", error);
@@ -226,8 +232,8 @@ class AccessTokenManager {
       }
 
       for (const record of records.data) {
-        let sql;
-        let values;
+        let sql = "";
+        let values = [];
 
         if (tableName === "sessions") {
           sql = `INSERT INTO sessions (id, company_id, name, activityId, sessionType, creationTime, endTime, state, progressPercent, resultResult, resultMessage, resultIsCanceled, resourceId, resourceReference, parentSessionId, usn)
@@ -267,14 +273,14 @@ class AccessTokenManager {
             record.usn,
           ];
         } else if (tableName === "repositories") {
-          sql = `INSERT INTO repositories (type, id,company_id, name, description, hostId, hostName, path, capacityGB, freeGB, usedSpaceGB)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+          sql = `INSERT INTO repositories (type, id, company_id, name, description, hostId, hostName, path, capacityGB, freeGB, usedSpaceGB)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
             type = VALUES(type),
             name = VALUES(name),
             description = VALUES(description),
-            hostId = VALUES(hostId),
-            hostName = VALUES(hostName),
+            hostId = CASE WHEN id = VALUES(id) THEN VALUES(hostId) ELSE hostId END,
+            hostName = CASE WHEN id = VALUES(id) THEN VALUES(hostName) ELSE hostName END,
             path = VALUES(path),
             capacityGB = VALUES(capacityGB),
             freeGB = VALUES(freeGB),
@@ -298,7 +304,9 @@ class AccessTokenManager {
           throw new Error("Invalid table name");
         }
 
-        await connection.execute(sql, values);
+        if (sql && values.length > 0) {
+          await connection.execute(sql, values);
+        }
       }
 
       await connection.end();

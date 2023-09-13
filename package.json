@@ -5,6 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "vite",
+    "main": "main.js",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
@@ -43,6 +44,7 @@
     "@vitejs/plugin-react": "^4.0.4",
     "electron": "^26.1.0",
     "electron-builder": "^24.6.4",
+    "electron-reload": "^2.0.0-alpha.1",
     "eslint": "^8.48.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",

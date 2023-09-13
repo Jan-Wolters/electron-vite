@@ -3,7 +3,7 @@ import NavBar from "../components/NavBar";
 
 function Company() {
   return (
-    <div className="className=w-75 mx-auto container overflow-hidden shadow-lg">
+    <div className="w-auto  mx-5 overflow-hidden shadow-lg">
       <NavBar />
       <CompanyAd />{" "}
     </div>

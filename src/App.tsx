@@ -6,7 +6,7 @@ import Company from "./vieuw/RoutePath/CompanyADD.tsx";
 function App() {
   return (
     <Router>
-      <div className="overflow-hidden">
+      <div className="mt-4">
         {" "}
         {/* Apply the 'overflow-hidden' class here */}
         <Routes>

@@ -3,7 +3,7 @@ import NavBar from "../components/NavBar";
 
 function Dashboard() {
   return (
-    <div className="w-75 mx-auto container overflow-hidden shadow-lg">
+    <div className="w-auto  mx-5 overflow-hidden shadow-lg">
       <NavBar />
       <ListGroup />{" "}
     </div>

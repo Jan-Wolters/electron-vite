@@ -49,7 +49,7 @@ const fetchAndMapData = async <T>(endpoint: string): Promise<T[]> => {
 
 export const fetchData = async (): Promise<Company[]> => {
   try {
-    const endpoint = `http://localhost:3007/info`;
+    const endpoint = `http://localhost:3008/info`;
     const companyData = await fetchAndMapData<Company>(endpoint);
     return companyData;
   } catch (error) {
@@ -58,13 +58,11 @@ export const fetchData = async (): Promise<Company[]> => {
   }
 };
 
-
-
 export const saveCompany = async (
   companyData: Partial<Company>
-): Promise<Response> => {
+): Promise<void> => {
   try {
-    const response = await fetch("http://localhost:3007/companies", {
+    const response = await fetch("http://localhost:3008/companies", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -77,7 +75,9 @@ export const saveCompany = async (
     }
 
     console.log("Company saved successfully");
-    return response;
+
+    // Refresh the page upon successful save
+    window.location.reload();
   } catch (error) {
     console.error("Error saving company:", error);
     throw error;
