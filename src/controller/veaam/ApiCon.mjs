@@ -36,8 +36,8 @@ class AccessTokenManager {
         username: veaamUsername,
         password: veaamPassword,
       };
-
-      const apiUrl = `https://${ip}:${port}/api/oauth2/token`;
+      const Veaam_Token_URL = process.env.VEEAM_TOKENURL;
+      const apiUrl = `https://${ip}:${port}${Veaam_Token_URL}`;
 
       // Debugging: Log the request URL
       console.log("Request URL:", apiUrl);
@@ -333,8 +333,11 @@ class AccessTokenManager {
           apiCredentials.password
         );
 
-        const sessionsApiUrl = `https://${apiCredentials.ip}:${apiCredentials.port}/api/v1/sessions?limit=5`;
-        const repositoriesApiUrl = `https://${apiCredentials.ip}:${apiCredentials.port}/api/v1/backupInfrastructure/repositories/states`;
+        const Veaam_Session_URL = process.env.VEAAM_SESSIONSURL;
+        const Veaam_Repositories_URL = process.env.VEEAM_REPOSITORIEURL;
+
+        const sessionsApiUrl = `https://${apiCredentials.ip}:${apiCredentials.port}${Veaam_Session_URL}`;
+        const repositoriesApiUrl = `https://${apiCredentials.ip}:${apiCredentials.port}${Veaam_Repositories_URL}`;
 
         // Fetch data from the sessions API and log it to the console
         console.log("Fetching sessions data...");
@@ -382,3 +385,15 @@ class AccessTokenManager {
   await accessTokenManager.executeApiRequests();
   console.log("ApiCon.js execution completed.");
 })();
+
+/*
+
+API Credentials List: [
+  {
+    company_id: 153,
+    ip: '192.168.28.22',
+    port: '9419',
+    username: 'restapi',
+    password: '-$$k9OKe2bOlC?$0"fBZ'
+
+*/

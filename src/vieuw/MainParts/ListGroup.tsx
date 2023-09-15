@@ -18,8 +18,6 @@ function ListGroup() {
     fetchCompanies();
   }, []);
 
-  // Function to trigger the server restart
-
   return (
     <div id="top" className="shadow-lg p-3 mb-5 bg-white rounded">
       <div id="List" className="d-fill">

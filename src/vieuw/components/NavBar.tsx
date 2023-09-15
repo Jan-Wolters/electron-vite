@@ -26,6 +26,11 @@ function NavBar() {
                 Add
               </Link>
             </div>
+            <div className="nav-item me-4">
+              <Link to="/companyUP" className="nav-link">
+                Delete
+              </Link>
+            </div>
           </div>
         </div>
 

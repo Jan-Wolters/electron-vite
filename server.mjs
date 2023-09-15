@@ -88,7 +88,8 @@ function runScript() {
 
 // Routes
 app.get("/info", getInfo);
-
+app.get("/infocon", getInfoCon);
+app.delete("/companies/:companyId", deleteCompany);
 app.post("/companies", saveCompany);
 
 async function getInfo(req, res) {
@@ -203,6 +204,48 @@ ORDER BY
   }
 }
 
+async function getInfoCon(req, res) {
+  try {
+    const companieQuery = `
+    SELECT
+    company_id,
+    name AS company_name,
+    ip AS company_ip,
+    port AS company_port,
+    veaamUsername,
+    veaamPassword
+  FROM companies
+    `;
+
+    const companieRows = await databaseManager.query(companieQuery);
+
+    if (Array.isArray(companieRows) && companieRows.length > 0) {
+      const companiesData = companieRows.map((companyRow) => ({
+        company_id: companyRow.company_id,
+        company_name: companyRow.company_name,
+        company_ip: companyRow.company_ip,
+        company_port: companyRow.company_port,
+        veaamUsername: companyRow.veaamUsername,
+        veaamPassword: companyRow.veaamPassword,
+      }));
+
+      console.log("Companies Data:", companiesData); // Log the company data
+
+      res.json(companiesData);
+    } else {
+      console.error(
+        "No companies found or invalid response from the database."
+      );
+      return res.status(404).json({
+        error: "No companies found or an error occurred while fetching data.",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "An error occurred while fetching data." });
+  }
+}
+
 function saveCompany(req, res) {
   const { name, ip, port, veaamUsername, veaamPassword } = req.body;
 
@@ -222,6 +265,111 @@ function saveCompany(req, res) {
         .status(500)
         .json({ error: "An error occurred while saving company information." });
     });
+}
+
+function deleteCompany(req, res) {
+  const companyId = req.params.companyId; // Assuming companyId is part of the request parameters
+
+  // Define SQL queries to delete related records from other tables
+  const deleteCompanyQuery = `DELETE FROM companies WHERE company_id = ?`;
+  const deleteRepositoriesQuery = `DELETE FROM repositories WHERE company_id = ?`;
+  const deleteSessionsQuery = `DELETE FROM sessions WHERE company_id = ?`;
+
+  // Start a database transaction
+  databaseManager.pool.getConnection((err, connection) => {
+    if (err) {
+      console.error("Error connecting to database:", err);
+      res
+        .status(500)
+        .json({ error: "An error occurred while deleting the company." });
+      return;
+    }
+
+    connection.beginTransaction((err) => {
+      if (err) {
+        console.error("Error starting transaction:", err);
+        res
+          .status(500)
+          .json({ error: "An error occurred while deleting the company." });
+        connection.release();
+        return;
+      }
+
+      // Execute queries in a transaction
+      connection.query(deleteCompanyQuery, [companyId], (err, results) => {
+        if (err) {
+          console.error("Error deleting company:", err);
+          connection.rollback(() => {
+            connection.release();
+            res
+              .status(500)
+              .json({ error: "An error occurred while deleting the company." });
+          });
+          return;
+        }
+
+        // Check if any rows were deleted from the company table
+        if (results.affectedRows === 0) {
+          connection.rollback(() => {
+            connection.release();
+            res
+              .status(404)
+              .json({ error: "Company not found or already deleted" });
+          });
+          return;
+        }
+
+        // Continue with deleting related records
+        connection.query(deleteRepositoriesQuery, [companyId], (err) => {
+          if (err) {
+            console.error("Error deleting repositories:", err);
+            connection.rollback(() => {
+              connection.release();
+              res.status(500).json({
+                error: "An error occurred while deleting the company.",
+              });
+            });
+            return;
+          }
+
+          connection.query(deleteSessionsQuery, [companyId], (err) => {
+            if (err) {
+              console.error("Error deleting sessions:", err);
+              connection.rollback(() => {
+                connection.release();
+                res.status(500).json({
+                  error: "An error occurred while deleting the company.",
+                });
+              });
+              return;
+            }
+
+            // Commit the transaction if all queries were successful
+            connection.commit((err) => {
+              if (err) {
+                console.error("Error committing transaction:", err);
+                connection.rollback(() => {
+                  connection.release();
+                  res.status(500).json({
+                    error: "An error occurred while deleting the company.",
+                  });
+                });
+                return;
+              }
+
+              console.log("Company and related data deleted successfully");
+              res.json({
+                message: "Company and related data deleted successfully",
+              });
+
+              // Release the database connection
+              connection.release();
+            });
+          });
+        });
+      });
+    });
+  });
 }
 
 // Set script path and start the initial run
