@@ -76,7 +76,7 @@ function runScript() {
     scriptCount++;
     console.log(`Script count: ${scriptCount}`);
 
-    // Set the delay for the next run (1 minute)
+    // Set the delay for the next run (10 minute)
     const delayInMilliseconds = parseInt(1 * 60 * 1000);
 
     // Call the runScript function again after the delay

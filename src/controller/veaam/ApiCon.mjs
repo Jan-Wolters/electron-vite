@@ -387,13 +387,4 @@ class AccessTokenManager {
 })();
 
 /*
-
-API Credentials List: [
-  {
-    company_id: 153,
-    ip: '192.168.28.22',
-    port: '9419',
-    username: 'restapi',
-    password: '-$$k9OKe2bOlC?$0"fBZ'
-
-*/
+ */

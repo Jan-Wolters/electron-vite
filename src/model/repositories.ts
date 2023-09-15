@@ -130,6 +130,7 @@ export const deleteCompany = async (companyId: number): Promise<void> => {
     console.log("Company deleted successfully");
 
     // You can perform any additional actions here after successful deletion
+    window.location.reload();
   } catch (error) {
     console.error("Error deleting company:", error);
     throw error;
